@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+if [[ -z ${1+x} ]]; then
+  echo 'no Alias given'
+  exit 1;
+fi
+
+ALIAS=$1
+CONFIG="$(wp cli alias get $ALIAS)"
+
+SSH=$(echo "$CONFIG" | sed -n 's#ssh\:\(.*\)#\1#p')
+
+if [[ $SSH == *":"* ]]; then
+  SSH=$(echo "$SSH" | sed -n 's#\:\(.*\)# -p \1#p')
+fi
+eval "ssh ${SSH}"
