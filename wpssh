@@ -7,9 +7,22 @@ fi
 
 ALIAS=$1
 CONFIG="$(wp cli alias get $ALIAS)"
+if [[ "${CONFIG}" == "" ]]; then
+  echo "Cannot find the alias"
+  exit
+fi
 
-SSH=$(echo "$CONFIG" | sed -n 's#ssh\:\(.*\)#\1#p')
+SSH=$(echo "$CONFIG" | sed -n 's#ssh\:\s*\(.*\)#\1#p')
 
+# check for filezilla.
+if [[ "${2}" == "--filezilla" ]]; then
+  REMOTE_PATH=$(echo "$CONFIG" | sed -n 's#path\:\s*\(.*\)#\1#p')
+  REMOTE_PATH=${REMOTE_PATH%wp/}
+  eval "filezilla sftp://${SSH}${REMOTE_PATH} --local=$(pwd)"
+  exit
+fi
+
+# set the port, if exists.
 if [[ $SSH == *":"* ]]; then
   SSH=$(echo "$SSH" | sed -n 's#\:\(.*\)# -p \1#p')
 fi
